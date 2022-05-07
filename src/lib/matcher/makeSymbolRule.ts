@@ -1,19 +1,16 @@
-import { RuleResult } from "../rule/result/result";
-import { RuleTypes } from "../rule/ruleTypes";
-
 export const makeSymbolRule =
-  <T extends string, U extends RuleTypes>(type: U, symbol: T, priority = 0) =>
-  ([codeSym]: string): RuleResult => {
+  <T extends string, U extends string>(type: U, symbol: T) =>
+  ([codeSym]: string) => {
     return codeSym === symbol
       ? {
           value: symbol,
           type,
           length: 1,
-          status: "OK"
+          status: "OK" as const
         }
       : {
           type,
           error: "No",
-          status: "ERROR",
+          status: "ERROR" as const,
         };
   };

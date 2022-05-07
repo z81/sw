@@ -1,6 +1,9 @@
-import { AstTypes } from "./ast";
+import { grammar } from "./grammar";
 
-export const codegen: any = (ast: AstTypes, code = "") => {  
+const q = (strings: TemplateStringsArray, ...vars: any[]) => strings.reduce((res, str, i) => `${res}${str}${i < vars.length ? codegen(vars[i]) : ""}`, "");
+
+//ReturnType<typeof grammar>
+export const codegen: any = (ast: any, code = "") => {
     if (Array.isArray(ast)) {
         return ast.map(_ => codegen(_)).join("");
     }
@@ -9,7 +12,7 @@ export const codegen: any = (ast: AstTypes, code = "") => {
         return codegen(ast.body);
     }
 
-    if (ast.type === "REPEAT") {
+    if (ast.type === "REPEAT" || ast.type === "AND") {
         return codegen(ast.value);
     }
 
@@ -27,16 +30,29 @@ export const codegen: any = (ast: AstTypes, code = "") => {
         return `${left}${code} ${operator} ${right}`;
     }
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comтment
-    // @ts-ignore
     if (typeof ast.value === "string") {
         return `${ast.value}`;
     }
 
     if (ast.type === "VAR") {
-        return `const ${ast.name.value} = ${codegen(ast.value)}\n`;
+        return `const ${codegen(ast.name)} = ${codegen(ast.value)}\n`;
+    }
+
+    if (ast.type === "IF") {
+        return ` ${codegen(ast.condition)} ? ${codegen(ast.then)} : ${ast.else ? codegen(ast.else) : "undefined"} `;
+    }
+
+    if (ast.type === "ARRAY") {
+        return `[${[].concat(ast.items).map(codegen).join(" , ")}]`;
+    }
+
+    if (ast.type === "FOR") {
+        return `for(let ${codegen(ast.to)} of ${codegen(ast.from)}) {  ${codegen(ast.body)} }`;
     }
 
 
-    return "";
+    console.log(ast);
+
+
+    throw Error(`Unknown codegen rule ${ast?.type}`);
 };

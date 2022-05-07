@@ -1,17 +1,16 @@
 import { isOk } from "../result/ok";
-import { RuleResult } from "../result/result";
 import { Rule } from "../rule";
 
 export const maybe =
   <T extends Rule>(rule: T) =>
-  (code: string): RuleResult => {
+  (code: string) => {
     const res = rule(code);
 
     return isOk(res)
-      ? res
+      ? res as ReturnType<T>
       : ({
           value: "",
-          type: "MAYBE" as const,
+          type: "MAYBE",
           length: 0,
           status: "OK",
           skip: true,

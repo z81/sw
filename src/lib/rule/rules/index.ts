@@ -6,4 +6,4 @@ export * from "./maybe";
 export * from "./repeat";
 export * from "./skip";
 export * from "./key";
-export * from "./priority";
+export * from "./not";

@@ -1,19 +1,16 @@
-import { RuleResult } from "../rule/result/result";
-import { RuleTypes } from "../rule/ruleTypes";
-
 export const makeRangeRule =
-  <R extends string | number, T extends RuleTypes>(start: R, end: R, type: T) =>
-  ([symbol]: string): RuleResult => {
+  <R extends string | number, T extends string>(start: R, end: R, type: T) =>
+  ([symbol]: string) => {
     return symbol >= start && symbol <= end
       ? {
           value: symbol,
           type,
           length: 1,
-          status: "OK",
+          status: "OK" as const,
         }
       : {
           type,
           error: "No",
-          status: "ERROR",
+          status: "ERROR" as const,
         };
   };

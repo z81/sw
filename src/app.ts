@@ -1,25 +1,34 @@
 import fs from "fs";
-import { ast } from "./langs/math/ast";
 import { codegen } from "./langs/math/codegen";
 import { grammar } from "./langs/math/grammar";
 import { isOk } from "./lib/rule/result/ok";
 
 // -------------------------------------------------------------------
-const result = grammar(`
-  set a = 2 + 4 // 5 + 7 * 8
-  set b = true
-`);//+ 4 // 5 + 7 * 8 
+const src = `
+set a = 2 + 4 // 5 + 7 * 8
+set b = true
+set d = if 4 > 2 then 3 else 4
+set h2 = "string \\" woof 123 "
+set xx = [ 1 ]
+set h = [2, 3, "TEST"]
+for i of h { 1 }
+`;
 
-fs.writeFileSync("./dist/res.json", JSON.stringify(result, undefined, "  "), "utf-8");
+console.log("______________INPUT______________", src);
 
-let out: any = result;
+const result = grammar(src);
+
+fs.writeFileSync("./dist/out.json", JSON.stringify(result, undefined, "  "), "utf-8");
+
+const out: any = result;
 
 if (isOk(result)) {
-  out = ast(result as any); 
- 
   const c = codegen(out);
+  
+  console.log("_______________OUT_______________");
   console.log(c);
-  // console.log(eval(c));
+  // console.log(eval(c)); 
+} else {
+  console.error("error", result);
 }
 
-fs.writeFileSync("./dist/out.json", JSON.stringify(out, undefined, "  "), "utf-8");

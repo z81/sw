@@ -1,17 +1,17 @@
 import { isOk } from "../result/ok";
 import { Error } from "../result/error";
-import { RuleResult } from "../result/result";
 import { Rule } from "../rule";
+import { GetRuleRusult } from "../result/result";
 
 export const or =
   <T extends Rule[]>(...rules: T) =>
-  (code: string): RuleResult => {
+  (code: string) => {
     const errors: Error[] = [];
 
     for (const rule of rules) {
       const res = rule(code);
       if (isOk(res)) {
-        return res;
+        return res as GetRuleRusult<T>;
       }
       errors.push(res);
     }

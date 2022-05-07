@@ -1,19 +1,16 @@
-import { RuleResult } from "../rule/result/result";
-import { RuleTypes } from "../rule/ruleTypes";
-
 export const makeValueRule =
-  <T extends string, U extends RuleTypes>(type: U, value: T) =>
-  (code: string): RuleResult => {
+  <T extends string, U extends string>(type: U, value: T) =>
+  (code: string) => {
     return code.substring(0, value.length) === value
       ? {
           value,
           type,
           length: value.length,
-          status: "OK",
+          status: "OK" as const,
         }
       : {
           type,
           error: "No",
-          status: "ERROR",
+          status: "ERROR" as const,
         };
   };
