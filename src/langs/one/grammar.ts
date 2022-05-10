@@ -10,6 +10,10 @@ const NEW_LINE = makeSymbolRule("NEW_LINE", "\n");
 const PLUS = makeSymbolRule("PLUS", "+");
 const MINUS = makeSymbolRule("MINUS", "-");
 const MUL = makeSymbolRule("MUL", "*");
+// const PIPE = makeValueRule("PIPE", "|>");
+
+const BRACKET_OPEN = makeSymbolRule("BRACKET_OPEN", "(");
+const BRACKET_CLOSE = makeSymbolRule("BRACKET_CLOSE", ")");
 
 const DOT = makeSymbolRule("DOT", ".");
 
@@ -54,25 +58,57 @@ const POS_INT = repeat(DIGEST);
 const POS_FLOAT = as("POS_DOUBLE_NUM", or(and(POS_INT, DOT, POS_INT), POS_INT));
 const NUMBER = as("NUMBER", and(maybe(MINUS), POS_FLOAT));
 
+const EMPTY = or(SPACE, NEW_LINE);
+
+const _ = skip(maybe(repeat(EMPTY)));
+
+const SCOPE = as("SCOPE", and(
+  _, SCOPE_START,
+  _, key("body", lazy((): Rule => ROOT)),
+  _, SCOPE_END,
+  _,
+));
+
+const EXP_LAZY = lazy((): Rule => EXP);
+
+const FUNCTION_CALL_ARGS = and(
+  _,
+  EXP_LAZY,
+  _,
+  COMMA,
+  _,
+);
+
+const FUNCTION_CALL = as("FUNCTION_CALL", and(
+  _,
+  key("name", lazy((): Rule => VAR_NAME)),
+  _,
+  BRACKET_OPEN,
+  _,
+  key("args", or(
+    and(repeat(FUNCTION_CALL_ARGS), EXP_LAZY),
+    EXP_LAZY
+  )),
+  _,
+  BRACKET_CLOSE,
+  _,
+));
+
 const QUOTE = or(SINGLE_QUOTE, DOUBLE_QUOTE, BACK_QUOTE);
 
 // prettier-ignore
 const STRING = and(
-  QUOTE, 
+  QUOTE,
   repeat(
     or(
-      and(BACK_SLASH, QUOTE), 
+      and(BACK_SLASH, QUOTE),
       not(QUOTE)
     )
-  ), 
+  ),
   QUOTE
 );
 
 const BOOLEAN = as("BOOLEAN", or(TRUE, FALSE));
-
-const EMPTY = or(SPACE, NEW_LINE);
-
-const _ = skip(maybe(repeat(EMPTY)));
 
 //
 const IF_STAT = as(
@@ -86,11 +122,14 @@ const IF_STAT = as(
       lazy(() => EXP)
     ),
     _,
-    THEN,
-    _,
-    key(
-      "then",
-      lazy(() => EXP)
+    key("then", or(
+        and(
+          skip(THEN),
+          _,
+          lazy(() => EXP)
+        ),
+        SCOPE
+      )
     ),
     _,
     key(
@@ -117,10 +156,7 @@ const BIN_EXP = as(
     _,
     key("operator", OPERATOR),
     _,
-    key("right", or(
-      lazy((): Rule => EXP),
-      NUMBER
-    )),
+    key("right", lazy((): Rule => EXP)),
     _
   )
 );
@@ -132,7 +168,8 @@ const EXP = or(
   LITERAL,
   lazy((): Rule => IF_STAT),
   lazy((): Rule => ARRAY),
-  // lazy((): Rule => FORR)
+  lazy((): Rule => FUNCTION_CALL),
+  lazy((): Rule => VAR_NAME),
 );
 
 const VAR_NAME = repeat(or(AZ, DIGEST));
@@ -140,9 +177,7 @@ const VAR_NAME = repeat(or(AZ, DIGEST));
 // prettier-ignore
 const FORR = as("FOR", and(
   _, FOR, _, key("to", VAR_NAME), _, OF, _, key("from", VAR_NAME),
-  _, SCOPE_START, 
-  _, key("body", lazy((): Rule => EXP)),
-  _, SCOPE_END, 
+  _, key("body", SCOPE),
   _
 ));
 
@@ -156,7 +191,7 @@ const ARRAY_ITEMS = and(
 );
 
 // prettier-ignore
-const ARRAY = as("ARRAY", 
+const ARRAY = as("ARRAY",
   and(
     _,
     Q_BR_LEFT,
@@ -172,19 +207,19 @@ const ARRAY = as("ARRAY",
 const VAR = as(
   "VAR",
   and(
-    _, 
-    skip(SET), 
     _,
-    key("name", VAR_NAME), 
+    skip(SET),
     _,
-    key("operation", EQ), 
+    key("name", VAR_NAME),
     _,
-    key("value", EXP), 
+    key("operation", EQ),
+    _,
+    key("value", EXP),
     _
   )
 );
 
-const ROOT = repeat(or(VAR, IF_STAT, FORR));
+const ROOT = repeat(or(VAR, IF_STAT, FORR, FUNCTION_CALL, EXP));
 
 // prettier-ignore
 export const grammar = as(

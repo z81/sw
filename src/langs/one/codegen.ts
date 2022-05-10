@@ -9,7 +9,10 @@ export const codegen: any = (ast: any, code = "") => {
     }
 
     if (ast.type === "ROOT") {
-        return codegen(ast.body);
+        const std = `
+            const log = (...args) => console.log(...args)
+        `;
+        return std + codegen(ast.body);
     }
 
     if (ast.type === "REPEAT" || ast.type === "AND") {
@@ -21,9 +24,13 @@ export const codegen: any = (ast: any, code = "") => {
         const isDim = operator === "//";
         const left = codegen(ast.left);
         const right = codegen(ast.right, isDim ? ")" : "");
-        
 
-        if (isDim) {
+        if (operator === "|>") {
+            return `____${left} r${right}`;
+        }
+
+
+        if (operator === "//") {
             return `Math.trunc(${left} / ${right} `;
         }
 
@@ -35,11 +42,11 @@ export const codegen: any = (ast: any, code = "") => {
     }
 
     if (ast.type === "VAR") {
-        return `const ${codegen(ast.name)} = ${codegen(ast.value)}\n`;
+        return `\nconst ${codegen(ast.name)} = ${codegen(ast.value)}\n`;
     }
 
     if (ast.type === "IF") {
-        return ` ${codegen(ast.condition)} ? ${codegen(ast.then)} : ${ast.else ? codegen(ast.else) : "undefined"} `;
+        return ` ${codegen(ast.condition)} ? ${codegen(ast.then)} : ${ast.else ? codegen(ast.else) : "undefined"} \n`;
     }
 
     if (ast.type === "ARRAY") {
@@ -47,7 +54,15 @@ export const codegen: any = (ast: any, code = "") => {
     }
 
     if (ast.type === "FOR") {
-        return `for(let ${codegen(ast.to)} of ${codegen(ast.from)}) {  ${codegen(ast.body)} }`;
+        return `for(let ${codegen(ast.to)} of ${codegen(ast.from)}) {  ${codegen(ast.body)} }\n`;
+    }
+
+    if (ast.type === "FUNCTION_CALL") {
+        return `${codegen(ast.name)}(${codegen(ast.args)})`;
+    }
+
+    if (ast.type === "SCOPE") {
+        return `eval(\`${codegen(ast.body)}\`)`;
     }
 
 
