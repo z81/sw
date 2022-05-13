@@ -1,3 +1,12 @@
+/**
+Number.|> a = this(a)
+
+Number 
+
+
+
+*/
+
 /*
 
 Node = when

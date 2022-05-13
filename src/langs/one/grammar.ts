@@ -219,11 +219,13 @@ const VAR = as(
   )
 );
 
-const ROOT = repeat(or(VAR, IF_STAT, FORR, FUNCTION_CALL, EXP));
+const ALL = or(VAR, IF_STAT, FORR, FUNCTION_CALL, EXP);
+
+const ROOT = repeat(ALL);
 
 // prettier-ignore
 export const grammar = as(
   "ROOT",
-  and(key("body", ROOT)),
+  and(key("body", repeat(ALL, true))),
   false
 );

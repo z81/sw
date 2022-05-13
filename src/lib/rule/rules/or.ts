@@ -19,6 +19,6 @@ export const or =
     return {
       type: "OR",
       status: "ERROR",
-      error: `Excepted some ${errors.map((e) => e.type)} found "${code.substring(0, 5)}"`,
+      error: `Excepted some ${errors.map((e) => e.type)} found "${code.substring(0, 10)}"`,
     } as const;
   };

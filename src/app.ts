@@ -1,4 +1,5 @@
 import fs from "fs";
+import { isError } from "./lib/rule/result/error";
 import { codegen } from "./langs/one/codegen";
 import { grammar } from "./langs/one/grammar";
 import { isOk } from "./lib/rule/result/ok";
@@ -19,7 +20,7 @@ set x = if 4 > 3 {
 
 log("Test", parseInt(x, 10))
 
-
+"
 `;
 
 console.log("______________INPUT______________", src);
@@ -35,9 +36,9 @@ if (isOk(result)) {
 
   console.log("_______________OUT_______________");
   console.log(c);
-  console.log("_______________EVAL_______________");
-  console.log(eval(c));
-} else {
-  console.error("error", result);
+  // console.log("_______________EVAL_______________");
+  // console.log(eval(c));
+} else if (isError(result)){
+  console.error(result.error);
 }
 

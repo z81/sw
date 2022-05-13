@@ -1,4 +1,3 @@
-import { Ok } from "./ok";
 import { RuleResult } from "./result";
 
 export type Error<E extends unknown = unknown, T extends unknown = unknown> = {
@@ -7,4 +6,4 @@ export type Error<E extends unknown = unknown, T extends unknown = unknown> = {
   status: "ERROR";
 };
 
-export const isError = (value: RuleResult): value is Ok => typeof value === "object" && value.status === "ERROR";
+export const isError = (value: RuleResult): value is Error<unknown, string> => typeof value === "object" && value.status === "ERROR";
