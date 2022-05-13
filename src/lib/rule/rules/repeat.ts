@@ -1,15 +1,16 @@
 import { Ok, isOk } from "../result/ok";
 import { GetRuleRusult } from "../result/result";
 import { Rule } from "../rule";
+import { Ctx } from "../context";
 
 export const repeat =
   <T extends Rule>(rule: T, end = false) =>
-  (code: string) => {
+  (code: string, ctx: Ctx) => {
     const result: Ok[] = [];
     let str = code;
 
     while (true) {
-        const res = rule(str);
+        const res = rule(str, ctx);
 
         if (!isOk(res) || str.length === 0) {
           if (result.length === 1) {

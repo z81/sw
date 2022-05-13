@@ -1,10 +1,11 @@
 import { isOk } from "../result/ok";
 import { Rule } from "../rule";
+import { Ctx } from "../context";
 
 export const as =
   <R extends Rule, T extends string>(type: T, rule: R, up = true) =>
-  (code: string) => {
-    let res = rule(code);
+  (code: string, ctx: Ctx) => {
+    let res = rule(code, ctx);
     const len = isOk(res) ? res.length : undefined;
 
     if (up && isOk(res) && Array.isArray(res.value)) {
